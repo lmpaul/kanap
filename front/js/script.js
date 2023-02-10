@@ -9,12 +9,14 @@ const getProducts = async () => {
 
 const addProductToDom = (product) => {
   const itemsSection = document.querySelector('#items')
+
   const productLink = document.createElement('a')
-  productLink.href=`/product.html?id=${product._id}`
+  productLink.href=`../html/product.html?id=${product._id}`
 
   const productArticle = document.createElement('article')
 
   const productImg = document.createElement('img')
+  productImg.alt = product.altTxt
 
   const productTitle = document.createElement('h3')
   productTitle.classList.add('productName')
