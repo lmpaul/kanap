@@ -24,9 +24,9 @@ const addColorsOptions = (colors) => {
   })
 }
 
-const updatePageContent = async () => {
-  const productId = new URLSearchParams(document.location.search).get('id')
-  const product = await getProduct(productId)
+const updatePageContent = async (id) => {
+
+  const product = await getProduct(id)
   console.log(product)
   document.title = product.name
 
@@ -38,4 +38,24 @@ const updatePageContent = async () => {
 
 }
 
-updatePageContent()
+const addProductToCart = (id) => {
+
+  const cart = localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart')) : []
+  const quantity = document.querySelector("#quantity").value
+  const color = document.querySelector('#colors').value
+
+  const sameProduct = cart.find((product) => product.id === id && product.color === color)
+  if (sameProduct) {
+    sameProduct.quantity = parseInt(sameProduct.quantity) + parseInt(quantity)
+  } else {
+    const cartItem = {id: id, quantity: quantity, color: color}
+    cart.push(cartItem)
+  }
+
+  localStorage.removeItem("cart")
+  localStorage.setItem("cart", JSON.stringify(cart))
+}
+
+const productId = new URLSearchParams(document.location.search).get('id')
+updatePageContent(productId)
+document.querySelector("#addToCart").addEventListener('click', () => addProductToCart(productId))
