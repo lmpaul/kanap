@@ -1,3 +1,35 @@
+const changeProductQty = (e) => {
+  const article = e.target.closest('article')
+  const id = article.dataset.id
+  const color = article.dataset.color
+
+  const text = e.target.previousSibling
+  text.innerText = "Qté: " + e.target.value
+  const cart = localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart')) : []
+  cart.find((item) => item.id === id && item.color === color ).quantity = e.target.value
+  localStorage.removeItem("cart")
+  localStorage.setItem("cart", JSON.stringify(cart))
+  updateCartTotals()
+}
+
+const deleteArticle = (e) => {
+  const article = e.target.closest('article')
+  const id = article.dataset.id
+  const color = article.dataset.color
+
+  const cart = localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart')) : []
+  const differentId = cart.filter((item) => item.id !== id )
+  const sameId = cart.filter((item) => item.id === id )
+  const sameIdDifferentColor = sameId.filter((item) => item.color !== color)
+  const newCart = differentId.concat(sameIdDifferentColor)
+
+  localStorage.removeItem("cart")
+  localStorage.setItem("cart", JSON.stringify(newCart))
+
+  article.remove()
+  updateCartTotals()
+}
+
 const addProductToPage = async (product, products) => {
   const productInfo = products.find((item) => item._id === product.id)
   const articlesSection = document.querySelector('#cart__items')
@@ -42,6 +74,7 @@ const addProductToPage = async (product, products) => {
   quantityInput.min = "1"
   quantityInput.max="100"
   quantityInput.value = product.quantity
+  quantityInput.addEventListener('change', (e) => {changeProductQty(e)})
   quantityDiv.append(quantityText, quantityInput)
 
   const deleteDiv = document.createElement('div')
@@ -49,6 +82,7 @@ const addProductToPage = async (product, products) => {
   const deleteText = document.createElement('p')
   deleteText.classList.add('deleteItem')
   deleteText.innerText = 'Supprimer'
+  deleteText.addEventListener('click', (e) => (deleteArticle(e)))
   deleteDiv.append(deleteText)
 
   productContentSettingsDiv.append(quantityDiv, deleteDiv)
@@ -83,11 +117,18 @@ const getProducts = async () => {
   return products
 }
 
-const updatePageContent = async () => {
+
+const updateCartArticles = async () => {
   const products = await getProducts()
   const cart = localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart')) : []
   cart.forEach((product) => addProductToPage(product, products))
+}
+
+const updateCartTotals = async () => {
+  const products = await getProducts()
+  const cart = localStorage.getItem('cart') ? JSON.parse(localStorage.getItem('cart')) : []
   updateCartTotal(cart, products)
 }
 
-updatePageContent()
+updateCartArticles()
+updateCartTotals()
