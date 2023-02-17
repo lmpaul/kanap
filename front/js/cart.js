@@ -110,13 +110,11 @@ const updateCartTotal = (cart, products) => {
   document.querySelector('#totalPrice').innerText = totalPrice
 }
 
-
 const getProducts = async () => {
   const response = await fetch('http://localhost:3000/api/products')
   const products = await response.json()
   return products
 }
-
 
 const updateCartArticles = async () => {
   const products = await getProducts()
@@ -138,6 +136,14 @@ const hideInputErrorMessage = (id) => {
 const displayInputErrorMessage = (inputType, id) => {
   const invalidInput = document.querySelector(`#${id}ErrorMsg`)
   switch (inputType) {
+    case 'firstName':
+      invalidInput.innerText = 'Votre prénom semble être incorrect.'
+    case 'lastName':
+    invalidInput.innerText = 'Votre nom semble être incorrect.'
+    case 'address':
+      invalidInput.innerText = 'Votre adresse est invalide.'
+    case 'city':
+      invalidInput.innerText = 'Votre ville semble être incorrecte.'
     case 'email':
       invalidInput.innerText = 'Votre adresse email est invalide.'
     default:
@@ -147,6 +153,12 @@ const displayInputErrorMessage = (inputType, id) => {
 
 const getRegex = (inputType) => {
   switch (inputType) {
+    case 'firstName':
+    case 'lastName':
+    case 'city':
+      return /(\D{2})+/
+    case 'address':
+      return /\d+(\s\w+)+/
     case 'email':
       return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
     default:

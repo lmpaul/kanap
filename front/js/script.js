@@ -6,7 +6,6 @@ const getProducts = async () => {
   return products
 }
 
-
 const addProductToDom = (product) => {
   const itemsSection = document.querySelector('#items')
 
