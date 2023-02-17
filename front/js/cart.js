@@ -130,5 +130,82 @@ const updateCartTotals = async () => {
   updateCartTotal(cart, products)
 }
 
+const hideInputErrorMessage = (id) => {
+  const invalidInput = document.querySelector(`#${id}ErrorMsg`)
+  invalidInput.innerText = ''
+}
+
+const displayInputErrorMessage = (inputType, id) => {
+  const invalidInput = document.querySelector(`#${id}ErrorMsg`)
+  switch (inputType) {
+    case 'email':
+      invalidInput.innerText = 'Votre adresse email est invalide.'
+    default:
+      invalidInput.innerText = 'Ce champs est invalide.'
+  }
+}
+
+const getRegex = (inputType) => {
+  switch (inputType) {
+    case 'email':
+      return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
+    default:
+      return /(.+)/
+  }
+}
+
+const checkAllInputs = (inputDivs) => {
+  const contactObject = {
+    firstName: null,
+    lastName: null,
+    address: null,
+    city: null,
+    email: null
+  }
+
+  inputDivs.forEach((div) => {
+    const input = div.querySelector('input')
+    const regex = getRegex(input.name)
+    const isValid = input.value.match(regex) ? true : false
+    if (isValid) {
+      hideInputErrorMessage(input.id)
+      contactObject[input.name] = input.value
+    } else {
+      displayInputErrorMessage(input.name, input.id)
+    }
+  })
+  return contactObject
+}
+
+const postOrder = async (contactObject) => {
+  const cart = JSON.parse(localStorage.getItem('cart'))
+  const productIds = cart.map((item) => item.id)
+  const uniqueIds = [...new Set(productIds)]
+  let response = await fetch('http://localhost:3000/api/products/order', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json;charset=utf-8'
+    },
+    body: JSON.stringify({contact: contactObject, products: uniqueIds})
+  });
+  const data = await response.json()
+  return data
+}
+
+const handleFormSubmit = async (e) => {
+  e.preventDefault()
+  const inputDivs = document.querySelectorAll('.cart__order__form__question')
+  const contactObject = checkAllInputs(inputDivs)
+  if (Object.values(contactObject).every((value) => value !== null )) {
+    const { orderId } = await postOrder(contactObject)
+    window.location = `/front/html/confirmation.html?orderid=${orderId}`;
+  } else {
+    console.log('the form is not valid')
+  }
+}
+
+const orderButton = document.querySelector('#order')
+orderButton.addEventListener('click', (e) => {handleFormSubmit(e)})
+
 updateCartArticles()
 updateCartTotals()
